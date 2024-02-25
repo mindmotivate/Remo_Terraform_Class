@@ -17,5 +17,4 @@ Output:
 - html_file_path2: 
   - Displays the filename of the "index.html" file.
  
-
-
+![html_result](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/1144bbf9-3a13-431d-b45e-67eebcbf722a)
