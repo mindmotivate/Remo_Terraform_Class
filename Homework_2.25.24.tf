@@ -42,12 +42,6 @@ description = "The deployment regions are as follows:"
 value = var.deployment_regions
 }
 
-
-
-# use for_each to iterate over the regions and create a local_file resource for each. 
-# The file should be named indicating the region and include basic content for the alert policy.
-
-
 # Define the local_file resources for each deployment region
 resource "local_file" "alert_policy" {
   for_each = var.deployment_regions
@@ -62,4 +56,55 @@ output "created_files" {
   value       = {
     for key, file in local_file.alert_policy : key => file.filename
   }
+}
+
+
+# Challenge 3
+
+# Define the following Variables:
+
+# A list variable named network_zones with the default values of "public", "private", "protected". 
+# Include a description for this variable.
+# A set variable named operating_systems with the default values of "linux", "windows", "macos". 
+# Ensure each variable includes a description.
+
+# Variables
+variable "network_zones" {
+  description = "List of network zones."
+  type        = list(string)
+  default     = ["public", "private", "protected"]
+}
+
+variable "operating_systems" {
+  description = "Set of operating systems."
+  type        = set(string)
+  default     = ["linux", "windows", "macos"]
+}
+
+#Create two `local_file` resources:
+#`network_zone_file`: Generate a file named `zone-type-[FIRST_ZONE].txt` using the first item in the `network_zones` list.
+# The content should be "Network zone type: [FIRST_ZONE]".
+#`operating_system_file`: Generate a file named `os-info.txt` using the first item in the `operating_systems` set. 
+# Convert the set to a list, then reference the first item. The content should be "Operating system in use: [FIRST_OS]".
+
+
+# Resources
+resource "local_file" "network_zone_file" {
+  filename = "${path.module}/zone-type-${var.network_zones[0]}.txt"
+  content  = "Network zone type: ${var.network_zones[0]}"
+}
+
+resource "local_file" "operating_system_file" {
+  filename = "${path.module}/os-info.txt"
+  content  = "Operating system in use: ${tolist(var.operating_systems)[0]}"
+}
+
+
+# Outputs
+output "network_zone_file_content" {
+  value = local_file.network_zone_file.content
+}
+
+output "operating_system_file_content" {
+  value = local_file.operating_system_file.content
 }
