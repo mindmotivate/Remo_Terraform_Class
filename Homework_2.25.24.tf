@@ -30,6 +30,7 @@ value = { for key, config in local_file.monitoring_config : key => config.conten
 
 
 # Challenge 2
+
 # Define a variable in variables.tf to hold the set of deployment regions.
 variable "deployment_regions" {
   description = "Set of deployment regions."
@@ -81,10 +82,10 @@ variable "operating_systems" {
   default     = ["linux", "windows", "macos"]
 }
 
-#Create two `local_file` resources:
-#`network_zone_file`: Generate a file named `zone-type-[FIRST_ZONE].txt` using the first item in the `network_zones` list.
+# Create two `local_file` resources:
+# Generate a file named `zone-type-[FIRST_ZONE].txt` using the first item in the `network_zones` list.
 # The content should be "Network zone type: [FIRST_ZONE]".
-#`operating_system_file`: Generate a file named `os-info.txt` using the first item in the `operating_systems` set. 
+# Generate a file named `os-info.txt` using the first item in the `operating_systems` set. 
 # Convert the set to a list, then reference the first item. The content should be "Operating system in use: [FIRST_OS]".
 
 
