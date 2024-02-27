@@ -50,7 +50,7 @@ variable "server_roles" {
 ### ***Define a variable in variables.tf to hold the set of deployment regions.***
 variable "deployment_regions" {
   
-## ***Description: Set of deployment regions for the infrastructure.***
+### ***Description: Set of deployment regions for the infrastructure.***
 description = "Set of deployment regions for the infrastructure."
   
 ### ***Type: List of strings.***
