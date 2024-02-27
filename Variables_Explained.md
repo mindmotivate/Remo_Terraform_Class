@@ -1,5 +1,5 @@
 
-# **Terraform Variable Example 1**
+# **Terraform List Variable Example 1**
 
 **Imagine you have three types of server roles that require monitoring: a cache server, a queue server, and a worker server (default values). Each server role needs a unique monitoring configuration file.**
 
@@ -38,27 +38,22 @@ variable "server_roles" {
 
 
 <>
-# **Terraform Variable Example 2**
+# **Terraform Set Variable Example 2**
 
 **Your infrastructure is deployed in three different regions: Europe North (eu-north-1), Asia Pacific South (ap-south-1), and Middle East South (me-south-1) (default values). You need to create an alert policy file for each region.**
 
 **Task:**
 **Define a variable in variables.tf to hold the set of deployment regions.***
 
-
-
-### ***Define a variable in variables.tf to hold the set of deployment regions.***
-variable "deployment_regions" {
   
-### ***Description: Set of deployment regions for the infrastructure.***
-description = "Set of deployment regions for the infrastructure."
+  ### ***Description: Set of deployment regions for the infrastructure.***
+  description = "Set of deployment regions for the infrastructure."
   
-### ***Type: List of strings.***
-type        = list(string)
+  ### ***Type: Set of strings.***
+  type        = set(string)
   
-### ***Default Values: Europe North (eu-north-1), Asia Pacific South (ap-south-1), and Middle East South (me-south-1).***
-default     = ["eu-north-1", "ap-south-1", "me-south-1"]
-}
+  ### ***Default Values: Europe North (eu-north-1), Asia Pacific South (ap-south-1), and Middle East South (me-south-1).***
+  default     = ["eu-north-1", "ap-south-1", "me-south-1"]
 
 
 ## ***Here's what your variable should look like:***
