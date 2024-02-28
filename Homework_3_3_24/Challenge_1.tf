@@ -21,7 +21,7 @@ output "server_names_output" {
 }
 
 
-# Join function: Concatenates elements of a list into a single string, separated by a delimiter.
+# Join function: Concatenates elements of a list into a single string, separated by a delimiter. (remeber Jay Remo used this one in class)
 # join(delimiter, list)
 
 # A 'delimiter' is a character or sequence of characters used to separate each element in the list before joining them into a single string.
@@ -34,14 +34,18 @@ output "server_names_output" {
 
 
 ## Set Variable Task
-# Sets ensure uniqueness, which is useful for managing collections of unique items like deployment regions. By defining a set variable named deployment_regions, we can guarantee that each region is listed only once. In this task, we initialize the deployment_regions variable with default values ["us-east-1", "eu-west-1", "ap-south-1"] and create a local_file resource to output these regions into a file named deployment-regions.txt, with each region on a new line.
-
-variable "deployment_regions" {
+# Sets ensure uniqueness, which is useful for managing collections of unique items like deployment regions. 
+# By defining a set variable named deployment_regions, we can guarantee that each region is listed only once. 
+# In this task, we initialize the deployment_regions variable with default values ["us-east-1", "eu-west-1", "ap-south-1"] 
   description = "Set of deployment regions."
   type        = set(string)
   default     = ["us-east-1", "eu-west-1", "ap-south-1"]
 }
 
+# Create a local_file resource to output these regions into a file named deployment-regions.txt, with each region on a new line.
+# This join(delimiter, list) confguration 
+
+variable "deployment_regions" {
 resource "local_file" "deployment_regions_file" {
   filename = "deployment-regions.txt"
   content  = join("\n", var.deployment_regions)
@@ -59,8 +63,21 @@ variable "app_configuration" {
   }
 }
 
+
+
+# Maps dont have a string representation!
+# They consist of key-value pairs, which are more complex than simple strings or lists.
+# for example: age = 30 is 'key' 'value' pair
+
+# you can make you content into a .yaml file if you want to
 resource "local_file" "app_config_file" {
-  filename = "app-config.txt"
+  filename = "app-config.yml"
+  content  = yamlencode(var.app_configuration)
+}
+
+# you can make you content into a .json file if you want to
+resource "local_file" "app_config_file" {
+  filename = "app-config.json"
   content  = jsonencode(var.app_configuration)
 }
 
@@ -79,10 +96,20 @@ variable "server_details" {
   }
 }
 
+# .json version
 resource "local_file" "server_details_file" {
-  filename = "server-details.txt"
+  filename = "server-details.json"
   content  = jsonencode(var.server_details)
 }
+
+# .yml version
+resource "local_file" "server_details_file" {
+  filename = "server-details.yml"
+  content  = ymlencode(var.server_details)
+}
+
+
+
 
 ## Tuple Variable Task
 # Tuples are suitable for managing fixed sequences of elements with different types. They provide a structured way to define specifications like node configurations. In this task, we define a tuple variable named node_specifications with default values ["node01", 4, true] representing node name, number of CPU cores, and master status. We then create a local_file resource to output these specifications into a file named node-specifications.txt.
@@ -96,4 +123,14 @@ variable "node_specifications" {
 resource "local_file" "node_specs_file" {
   filename = "node-specifications.txt"
   content  = join("\n", var.node_specifications)
+}
+
+
+resource "local_file" "node_specs_file" {
+  filename = "node-specifications.txt"
+  content  = join("\n", [for idx, item in var.node_specifications : "${idx + 1}. ${item}"])
+}
+
+output "node_specs_file_list" {
+value = local_file.node_specs_file.content
 }
