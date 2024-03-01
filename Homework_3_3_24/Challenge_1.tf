@@ -37,7 +37,8 @@ output "server_names_output" {
 # Sets ensure uniqueness, which is useful for managing collections of unique items like deployment regions. 
 # By defining a set variable named deployment_regions, we can guarantee that each region is listed only once. 
 # In this task, we initialize the deployment_regions variable with default values ["us-east-1", "eu-west-1", "ap-south-1"] 
-  description = "Set of deployment regions."
+variable "deployment_regions" {  
+description = "Set of deployment regions."
   type        = set(string)
   default     = ["us-east-1", "eu-west-1", "ap-south-1"]
 }
@@ -45,7 +46,7 @@ output "server_names_output" {
 # Create a local_file resource to output these regions into a file named deployment-regions.txt, with each region on a new line.
 # This join(delimiter, list) confguration 
 
-variable "deployment_regions" {
+
 resource "local_file" "deployment_regions_file" {
   filename = "deployment-regions.txt"
   content  = join("\n", var.deployment_regions)
