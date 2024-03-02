@@ -10,9 +10,8 @@ variable "server_names" {
   default     = ["server1", "server2", "server3"]
 }
 
-# We want the output file to be named "server-names.txt" 
 resource "local_file" "server_names_file" {
-  filename = "server-names.txt"
+  filename = "${path.module}/server-names.txt"
   content  = join("\n", var.server_names)
 }
 
@@ -37,8 +36,9 @@ output "server_names_output" {
 # Sets ensure uniqueness, which is useful for managing collections of unique items like deployment regions. 
 # By defining a set variable named deployment_regions, we can guarantee that each region is listed only once. 
 # In this task, we initialize the deployment_regions variable with default values ["us-east-1", "eu-west-1", "ap-south-1"] 
+
 variable "deployment_regions" {  
-description = "Set of deployment regions."
+  description = "Set of deployment regions."
   type        = set(string)
   default     = ["us-east-1", "eu-west-1", "ap-south-1"]
 }
@@ -48,7 +48,7 @@ description = "Set of deployment regions."
 
 
 resource "local_file" "deployment_regions_file" {
-  filename = "deployment-regions.txt"
+  filename = "${path.module}/deployment-regions.txt"
   content  = join("\n", var.deployment_regions)
 }
 
@@ -64,22 +64,9 @@ variable "app_configuration" {
   }
 }
 
-
-
-# Maps dont have a string representation!
-# They consist of key-value pairs, which are more complex than simple strings or lists.
-# for example: age = 30 is 'key' 'value' pair
-
-# you can make you content into a .yaml file if you want to
 resource "local_file" "app_config_file" {
-  filename = "app-config.yml"
+  filename = "${path.module}/app-config.yml"
   content  = yamlencode(var.app_configuration)
-}
-
-# you can make you content into a .json file if you want to
-resource "local_file" "app_config_file" {
-  filename = "app-config.json"
-  content  = jsonencode(var.app_configuration)
 }
 
 ## Object Variable Task
@@ -98,18 +85,16 @@ variable "server_details" {
 }
 
 # .json version
-resource "local_file" "server_details_file" {
-  filename = "server-details.json"
+resource "local_file" "server_details_file_json" {
+  filename = "${path.module}/server-details.json"
   content  = jsonencode(var.server_details)
 }
 
 # .yml version
-resource "local_file" "server_details_file" {
-  filename = "server-details.yml"
-  content  = ymlencode(var.server_details)
+resource "local_file" "server_details_file_yml" {
+  filename = "${path.module}/server-details.yml"
+  content  = yamlencode(var.server_details)
 }
-
-
 
 
 ## Tuple Variable Task
@@ -122,16 +107,11 @@ variable "node_specifications" {
 }
 
 resource "local_file" "node_specs_file" {
-  filename = "node-specifications.txt"
+  filename = "${path.module}/node-specifications.txt"
   content  = join("\n", var.node_specifications)
 }
 
-
-resource "local_file" "node_specs_file" {
-  filename = "node-specifications.txt"
-  content  = join("\n", [for idx, item in var.node_specifications : "${idx + 1}. ${item}"])
-}
-
 output "node_specs_file_list" {
-value = local_file.node_specs_file.content
+  value = local_file.node_specs_file.content
 }
+
