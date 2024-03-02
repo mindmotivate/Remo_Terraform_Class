@@ -97,6 +97,41 @@ resource "local_file" "server_details_file_yml" {
 }
 
 
+# Create JSON file with server details keys only.
+resource "local_file" "server_details_file_json_1" {
+  filename = "${path.module}/server-details.json"
+  content  = jsonencode(keys(var.server_details))
+}
+
+# Create YAML file with server details keys only.
+resource "local_file" "server_details_file_yml_1" {
+  filename = "${path.module}/server-details.yml"
+  content  = yamlencode(keys(var.server_details))
+}
+
+
+# Iterate over object variables to simplify their structure.
+# Construct a new data structure for easier consumption within the configuration.
+locals {
+  server_details_list = [
+    for k, v in var.server_details : {
+      key = k
+      value = v
+    }
+  ]
+}
+
+
+# Transform server details object into a list of key-value pairs and create a text file.
+resource "local_file" "server_details_file" {
+  filename = "${path.module}/server-details.txt"
+  content  = join("\n", [for item in local.server_details_list : "${item.key}: ${item.value}"])
+}
+
+
+
+
+
 ## Tuple Variable Task
 # Tuples are suitable for managing fixed sequences of elements with different types. They provide a structured way to define specifications like node configurations. In this task, we define a tuple variable named node_specifications with default values ["node01", 4, true] representing node name, number of CPU cores, and master status. We then create a local_file resource to output these specifications into a file named node-specifications.txt.
 
