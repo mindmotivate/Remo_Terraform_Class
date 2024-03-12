@@ -1,4 +1,4 @@
-# Requirements
+# Requirements:
 
 #IAM role named "ReadOnlyS3AccessRole"
 #This role will have a trust policy allowing any IAM user within your account to assume it.
@@ -20,7 +20,7 @@
 #Output the name of the IAM user, "S3ReadOnlyUser".
 
 
-# Terraform Code
+# Terraform Code:
 
 
 # Dynamically pull current account id
