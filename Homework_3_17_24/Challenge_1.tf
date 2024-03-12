@@ -1,4 +1,3 @@
-
 # Requirements
 
 #IAM role named "ReadOnlyS3AccessRole"
@@ -21,19 +20,17 @@
 #Output the name of the IAM user, "S3ReadOnlyUser".
 
 
-# Code
+# Terraform Code
 
 
-
+# Dynamically pull current account id
 data "aws_caller_identity" "current" {}
 
 
-
-# Task: Create an IAM role named ReadOnlyS3AccessRole. 
+# Create an IAM role named ReadOnlyS3AccessRole. 
 # This role should have a trust policy that allows IAM users within your AWS account to assume it.
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role
 # https://aws.amazon.com/blogs/security/how-to-use-trust-policies-with-iam-roles/
-
 
 
 resource "aws_iam_role" "readonly_s3_access_role" {
@@ -86,11 +83,12 @@ resource "aws_iam_user_policy_attachment" "user_policy_attachment" {
   policy_arn = aws_iam_policy.assume_role_policy.arn
 }
 
-# Outputs
+# Outputs for arn
 output "role_arn" {
   value = aws_iam_role.readonly_s3_access_role.arn
 }
 
+# Outputs for user name
 output "user_name" {
   value = aws_iam_user.s3_readonly_user.name
 }
