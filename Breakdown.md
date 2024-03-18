@@ -1,4 +1,4 @@
-### Step 1: Creating an IAM Role with S3 Read-Only Access
+### Creating an IAM Role with S3 Read-Only Access
 
 1. **IAM Role Creation:**
    - **Question:** What role are we creating?
@@ -21,7 +21,6 @@ The trust policy allows certain entities (specified by the AWS account ID) to as
 This temporary access is granted through the "sts:AssumeRole" action, which means users can temporarily "become" this role and inherit its permissions. 
 However, once their task is done or their time limit expires, their access is automatically revoked. 
 This helps ensure security and follows the principle of least privilege, as users only have access to resources for the duration they actually need it.
-
 
 We create an IAM role named "ReadOnlyS3AccessRole" that allows IAM users within the AWS account to assume it.
 A trust policy is defined to allow the root user of the AWS account (specified by ${var.aws_account_id}) to assume this role.
@@ -57,13 +56,81 @@ resource "aws_iam_role_policy_attachment" "s3_read_only" {
 }
 ```
 
+## Ok, onto the next task...
+
+Create a custom IAM policy named AssumeReadOnlyS3RolePolicy. This policy should allow an IAM user to perform the sts:AssumeRole action specifically on the ReadOnlyS3AccessRole.
+
+Create the policy content which should specify that the sts:AssumeRole action is allowed, and it should target the ARN of the ReadOnlyS3AccessRole created in the previous step.
+
+Note: "AmazonS3ReadOnlyAccess" is a pre-existing managed policy that is defined in aws already
+
+### Defining a Custom IAM Policy to Assume the S3 Read-Only Access Role
+
+1. **Policy Creation:**
+   - **Question:** What are we creating?
+   - **Answer:** We're making a policy called "AssumeReadOnlyS3RolePolicy" that outlines how an IAM user can borrow permissions from another role.
+
+2. **Policy Content:**
+   - **Question:** What does the policy say?
+   - **Answer:** It says that the IAM user can temporarily borrow permissions from a role named "ReadOnlyS3AccessRole" specifically to access S3 (Amazon Simple Storage Service) in read-only mode. The only action permitted by this policy is to assume the permissions of the "ReadOnlyS3AccessRole" role.
+
+3. **Specific Action Allowed:**
+   - **Question:** What action is permitted by this policy?
+   - **Answer:** The policy allows the IAM user to do one thing: assume the permissions of the "ReadOnlyS3AccessRole" role.
+
+## Steps 1-3
+
+```
+resource "aws_iam_policy" "assume_read_only_s3_role_policy" {
+  name   = "AssumeReadOnlyS3RolePolicy"
+  policy = <<-EOF
+  {
+	"Version": "2012-10-17",
+	"Statement": [
+  	{
+    	"Effect": "Allow",
+    	"Action": "sts:AssumeRole",
+    	"Resource": "${aws_iam_role.read_only_s3_access_role.arn}"
+  	}
+	]
+  }
+  EOF
+}
+```
+
+### Ok next task...
+Remo wants us to ... Create an IAM user named S3ReadOnlyUser.Attach the AssumeReadOnlyS3RolePolicy to this user. This setup allows the user to assume the ReadOnlyS3AccessRole, indirectly granting them read-only access to S3.
+
+I interpret this as two tasks:
+
+### To-Do List:
+
+1. **Create IAM User:**
+   - Create an IAM user named "S3ReadOnlyUser" using the `aws_iam_user` resource.
+
+2. **Attach Custom Policy:**
+   - Attach the previously defined custom IAM policy, "assume_read_only_s3_role_policy," to the newly created IAM user using the `aws_iam_user_policy_attachment` resource.
+   - This attachment grants the IAM user the necessary permissions to assume the role specified in the custom policy.
 
 
+Note: ARNs are frequently utilized in policy attachments to specify which policy should be linked to an IAM user, group, or role. In the Terraform code snippet, policy_arn = aws_iam_policy.assume_read_only_s3_role_policy.arn precisely identifies the ARN of the assume_read_only_s3_role_policy IAM policy for attachment, ensuring the user inherits its permissions
+
+### Step 1
+```
+# IAM User creation
+resource "aws_iam_user" "s3_read_only_user" {
+  name = "S3ReadOnlyUser"
+}
+```
+
+### Step 2
+```
+# Attach custom policy
+resource "aws_iam_user_policy_attachment" "attach_assume_role_policy" {
+  user       = aws_iam_user.s3_read_only_user.name
+  policy_arn = aws_iam_policy.assume_read_only_s3_role_policy.arn
+}
+
+```
 
 
-
-### Step 2: Defining a Custom IAM Policy to Assume the Role
-
-1. **IAM Policy Definition:**
-   - **Question:** What actions should this policy allow?
-   - **Answer:** The policy allows the `sts:AssumeRole` action on the `ReadOnlyS3AccessRole`, specifying that IAM users within the AWS account can assume this role.
