@@ -133,4 +133,26 @@ resource "aws_iam_user_policy_attachment" "attach_assume_role_policy" {
 
 ```
 
+### Create these two Outputs:
+- **Role ARN:** Output the Amazon Resource Name (ARN) of the ReadOnlyS3AccessRole.
+- **User Name:** Output the name of the IAM user, S3ReadOnlyUser.
+  
+- **`aws_iam_role.read_only_s3_access_role.arn`:**
+  - This line retrieves the ARN (Amazon Resource Name) of the IAM role named "read_only_s3_access_role". The `.arn` suffix is used to specify that we want the unique identifier for the role, which is useful for cross-resource references or sharing with other AWS services.
+
+- **`aws_iam_user.s3_read_only_user.name`:**
+  - This line fetches the name of the IAM user named "s3_read_only_user". The `.name` suffix indicates that we want the human-readable identifier for the user, which can be helpful for display purposes or naming other resources.
+
+```
+output "role_arn" {
+  value = aws_iam_role.read_only_s3_access_role.arn
+}
+ 
+output "user_name" {
+  value = aws_iam_user.s3_read_only_user.name
+}
+```
+
+### Congrats! I think we completed the tasks! However, as Remo stated...there are many other ways to achieve this result!
+
 
