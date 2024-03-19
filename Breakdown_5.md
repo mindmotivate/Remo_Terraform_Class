@@ -1,6 +1,6 @@
 # Challenge: Secure AWS Environment Setup with Terraform
 
-## Lets try to turn Remo's challenge in toa series of word problems, one sentence at a time!
+## Lets try to turn Remo's challenge into a series of word problems, one sentence at a time!
 
 ### Creating IAM Groups for Each Environment:
 
@@ -31,16 +31,48 @@ resource "aws_iam_group" "environment_groups" {
 }
 ```
 
-```
-# type this in the terminal to check your work
-terraform output environment_groups
+```hcl
+# Output details of each created group including: arn, name, path, id
+output "environment_group_names" {
+  value = values(aws_iam_group.environment_groups)
+}
 ```
 
 ### Define Users:
 
 **Task:** Set up a list of users, each indicating their role by their name prefix (e.g., DevMook, StagingRevan, ProdDack), and manually assign each to the correct group.
+
 **Question:** How are users assigned to groups?
+
 **Answer:** Users are manually assigned to the appropriate IAM groups based on their role and the environment they belong to.
+
+***Perhaps we use another list string variable to express the users? It seems as if Remo has given us the preferred names so we can go with those: DevMook, StagingRevan, ProdDack***
+
+```hcl
+# Define Users with names provided by remo
+variable "users" {
+  description = "List of users with their respective roles"
+  type        = list(string)
+  default     = ["DevMook", "StagingRevan", "ProdDack"]
+}
+```
+
+***Again, there are alot of ways to accomplsh this, i like using the count length function becasue it is a bit more straighforward***
+***I simply wan tto manually iterate over each anme and attatch a group***
+
+
+```hcl
+# Create Iam users via iteration using "count" parameter
+resource "aws_iam_user" "users" {
+  count = length(var.users)
+  name  = var.users[count.index]
+}
+```
+
+***The count parameter determines how many IAM users will be created. It's set to the length of the "users" list.***
+***The name attribute of each IAM user is set to the corresponding user name from the "users" list.***
+***During each iteration, count.index provides the current index value, starting from 0.***
+
 
 ### Custom Access Policies:
 
@@ -54,7 +86,7 @@ terraform output environment_groups
 **Question:** How are the custom policies linked to the IAM groups?
 **Answer:** The custom access policies are attached to the respective IAM groups to enforce the defined permissions for users in each environment.
 
-### Outputs:
+### Self Check Outputs:
 
 **Task:** The Terraform configuration should output the ARNs of all created IAM users and groups for verification purposes.
 **Question:** What information is being outputted?
