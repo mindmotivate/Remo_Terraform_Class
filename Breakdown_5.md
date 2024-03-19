@@ -83,21 +83,21 @@ Now we have to manually assign each of the users we created to the correct group
 resource "aws_iam_group_membership" "development_membership" {
   count  = length(var.users)
   name   = "${var.users[count.index]}-membership"
-  users  = [aws_iam_user.iam_users[count.index].name]
+  users  = [aws_iam_user.users[count.index].name]
   group  = aws_iam_group.environment_groups["Development"].name
 }
 
 resource "aws_iam_group_membership" "staging_membership" {
   count  = length(var.users)
   name   = "${var.users[count.index]}-membership"
-  users  = [aws_iam_user.iam_users[count.index].name]
+  users  = [aws_iam_user.users[count.index].name]
   group  = aws_iam_group.environment_groups["Staging"].name
 }
 
 resource "aws_iam_group_membership" "production_membership" {
   count  = length(var.users)
   name   = "${var.users[count.index]}-membership"
-  users  = [aws_iam_user.iam_users[count.index].name]
+  users  = [aws_iam_user.users[count.index].name]
   group  = aws_iam_group.environment_groups["Production"].name
 }
 ```
