@@ -11,7 +11,7 @@
 **Answer:** We're creating IAM groups for different environments like Development, Staging, and Production.
 
 ***I am thinking maybe we use a list string variable made up of the three environments?***
-***This way create the IAM groups resource we can reference those three dynamically(I am sure there are numerous ways to do this though..)***
+***This way when we create the IAM group resource we can reference those three groups dynamically (However, I am sure there are numerous ways to do this!)***
 
 ```hcl
 # Define IAM Groups for each environment 
