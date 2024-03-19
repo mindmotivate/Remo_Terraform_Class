@@ -81,27 +81,34 @@ Now we have to manually assign each of the users we created to the correct group
 
 ```hcl
 resource "aws_iam_group_membership" "development_membership" {
-  count  = length(var.users)
-  name   = "${var.users[count.index]}-membership"
-  users  = [aws_iam_user.users[count.index].name]
-  group  = aws_iam_group.environment_groups["Development"].name
+  name     = "${var.users[0]}-membership"
+  users    = [aws_iam_user.users[0].name]
+  group    = aws_iam_group.environment_groups["Development"].name
 }
 
 resource "aws_iam_group_membership" "staging_membership" {
-  count  = length(var.users)
-  name   = "${var.users[count.index]}-membership"
-  users  = [aws_iam_user.users[count.index].name]
-  group  = aws_iam_group.environment_groups["Staging"].name
+  name     = "${var.users[1]}-membership"
+  users    = [aws_iam_user.users[1].name]
+  group    = aws_iam_group.environment_groups["Staging"].name
 }
 
 resource "aws_iam_group_membership" "production_membership" {
-  count  = length(var.users)
-  name   = "${var.users[count.index]}-membership"
-  users  = [aws_iam_user.users[count.index].name]
-  group  = aws_iam_group.environment_groups["Production"].name
+  name     = "${var.users[2]}-membership"
+  users    = [aws_iam_user.users[2].name]
+  group    = aws_iam_group.environment_groups["Production"].name
 }
 ```
+If you want to create a simple output that provides a list of groups and their respective members, you can use this:
 
+```hcl
+output "group_memberships" {
+  value = {
+    "Development" = aws_iam_group_membership.development_membership
+    "Staging"     = aws_iam_group_membership.staging_membership
+    "Production"  = aws_iam_group_membership.production_membership
+  }
+}
+```
 
 ### Custom Access Policies:
 
