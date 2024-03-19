@@ -60,6 +60,9 @@ variable "users" {
 ***Again, there are alot of ways to accomplsh this, i like using the count length function becasue it is a bit more straighforward***
 ***I simply wan tto manually iterate over each anme and attatch a group***
 
+***The count parameter determines how many IAM users will be created. It's set to the length of the "users" list.***
+***The name attribute of each IAM user is set to the corresponding user name from the "users" list.***
+***During each iteration, count.index provides the current index value, starting from 0.***
 
 ```hcl
 # Create Iam users via iteration using "count" parameter
@@ -68,16 +71,44 @@ resource "aws_iam_user" "users" {
   name  = var.users[count.index]
 }
 ```
+Now we have to manually assign each of the users we created to the correct group:
+- Counting Users: We determine the number of users in the list and create a membership for each user.
+- Membership Name: Each membership receives a unique name by appending "-membership" to the user's name.
+- User Assignment: Users are assigned to memberships, with each membership containing only one IAM user.
+- Group Assignment: IAM users are added to the IAM group associated with the proper environment.
 
-***The count parameter determines how many IAM users will be created. It's set to the length of the "users" list.***
-***The name attribute of each IAM user is set to the corresponding user name from the "users" list.***
-***During each iteration, count.index provides the current index value, starting from 0.***
+### This method is NOT DRY!! I will need to revisit this and try to make it simpler but ti gets the job done for now.
+
+```hcl
+resource "aws_iam_group_membership" "development_membership" {
+  count  = length(var.users)
+  name   = "${var.users[count.index]}-membership"
+  users  = [aws_iam_user.iam_users[count.index].name]
+  group  = aws_iam_group.environment_groups["Development"].name
+}
+
+resource "aws_iam_group_membership" "staging_membership" {
+  count  = length(var.users)
+  name   = "${var.users[count.index]}-membership"
+  users  = [aws_iam_user.iam_users[count.index].name]
+  group  = aws_iam_group.environment_groups["Staging"].name
+}
+
+resource "aws_iam_group_membership" "production_membership" {
+  count  = length(var.users)
+  name   = "${var.users[count.index]}-membership"
+  users  = [aws_iam_user.iam_users[count.index].name]
+  group  = aws_iam_group.environment_groups["Production"].name
+}
+```
 
 
 ### Custom Access Policies:
 
 **Task:** Craft custom policies for each group, use both data source and define the policy directly.
+
 **Question:** What access policies are being defined?
+
 **Answer:** Custom access policies are defined for each environment specifying which actions users in those environments can perform on AWS resources.
 
 ### Assign Users to Groups:
