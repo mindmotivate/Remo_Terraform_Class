@@ -8,7 +8,7 @@
 
 **Question:** What groups are we creating?
 
-**Answer:** We're creating IAM groups for different environments like Development, Staging, and Production.
+**Answer:** We're creating IAM groups for different environments inluding: Development, Staging, and Production.
 
 ***I am thinking maybe we use a list string variable made up of the three environments?***
 ***This way when we create the IAM group resource we can reference those three groups dynamically (However, I am sure there are numerous ways to do this!)***
