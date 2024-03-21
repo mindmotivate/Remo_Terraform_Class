@@ -113,7 +113,7 @@ output "group_memberships" {
 
 
 ## *Dry Approach
-If you want to try to create teh group membership resrouces dynamically using a DRY approach, you may want ot consider using the count = length argument.
+If you want to try to create the group membership resrouces dynamically using a DRY approach, you may want ot consider using the count = length argument.
 
 1. Count Users: Determine the number of users and create a membership for each.
 2. Membership Name: Generate a unique name for each membership.
@@ -138,14 +138,112 @@ resource "aws_iam_group_membership" "environment_memberships" {
 
 **Answer:** Custom access policies are defined for each environment specifying which actions users in those environments can perform on AWS resources.
 
-### Assign Users to Groups:
+Remo gave us an idea of the type of actions each policy should have:
+Development: Grant EC2 actions, S3 list, and read operations.
+Staging: Allow S3 read operations and viewing CloudWatch logs.
+Production: Limit to S3 read operations only.
+
+Look through the console and try to find the ones that best fit: (the following are just examples....)
+
+**Development:**
+- Grant EC2 actions:
+  - [AmazonEC2FullAccess](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_job-functions.html#jf_amazon-ec2-full-access)
+  - [AmazonEC2ReadOnlyAccess](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_job-functions.html#jf_amazon-ec2-read-only-access)
+- S3 list and read operations:
+  - [AmazonS3ReadOnlyAccess](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_job-functions.html#jf_s3_read-only-console)
+
+**Staging:**
+- Allow S3 read operations:
+  - [AmazonS3ReadOnlyAccess](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_job-functions.html#jf_s3_read-only-console)
+- Viewing CloudWatch logs:
+  - [CloudWatchReadOnlyAccess](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_job-functions.html#jf_cloudwatch-read-only-console)
+
+**Production:**
+- Limit to S3 read operations only:
+  - [AmazonS3ReadOnlyAccess](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_job-functions.html#jf_s3_read-only-console)
+
+
+***Next, I simply took Remos' example from class and replaced the policy actions listed above:***
+***This will define the polic documents***
+
+```hcl
+# Define custom policy documents for each environment
+data "aws_iam_policy_document" "custom_policy_doc" {
+  for_each = {
+    development = {
+      actions   = ["ec2:DescribeInstances", "ec2:StartInstances", "ec2:StopInstances", "s3:ListBucket", "s3:GetObject"]
+      resources = ["*"]
+    },
+    staging = {
+      actions   = ["s3:ListBucket", "s3:GetObject", "logs:DescribeLogGroups", "logs:DescribeLogStreams", "logs:GetLogEvents"]
+      resources = ["arn:aws:s3:::example-staging-bucket/*"]
+    },
+    production = {
+      actions   = ["s3:GetObject"]
+      resources = ["arn:aws:s3:::example-production-bucket/*"]
+    }
+  }
+  statement {
+    actions   = each.value.actions
+    resources = each.value.resources
+    effect    = "Allow"
+  }
+}
+```
+***No that we have created the policy documents, we can go ahead and create the policies (this was also taken directly from Remo's class example)***
+
+```hcl
+# Create custom IAM policies from policy documents
+resource "aws_iam_policy" "custom_policy" {
+  for_each = data.aws_iam_policy_document.custom_policy_doc
+  name     = "${each.key}-policy"
+  policy   = each.value.json
+}
+```
+
+***Now for the policy atatchment (this was also taken directly from Remo's class example)***
+
+```hcl
+# Attach custom policies to IAM groups dynamically
+resource "aws_iam_group_policy_attachment" "environment_policy_attachment" {
+  for_each = aws_iam_group.environment_groups
+
+  group      = each.key
+  policy_arn = data.aws_iam_policy_document.custom_policy_doc[each.key].arn
+}
+```
+
+## Assign Users to Groups:
 
 **Task:** Manually ensure that each IAM user is a member of their respective group.
 **Question:** How are the custom policies linked to the IAM groups?
 **Answer:** The custom access policies are attached to the respective IAM groups to enforce the defined permissions for users in each environment.
+
+```hcl
+resource "aws_iam_group_membership" "development_membership" {
+  count = length(var.users)
+
+  name  = "${var.users[count.index]}-membership"
+  users = [aws_iam_user.users[count.index].name]
+  group = aws_iam_group.environment_groups["Development"].name
+}
+```
 
 ### Self Check Outputs:
 
 **Task:** The Terraform configuration should output the ARNs of all created IAM users and groups for verification purposes.
 **Question:** What information is being outputted?
 **Answer:** The Amazon Resource Names (ARNs) of the created IAM users and groups are being outputted for reference and further use.
+
+```hcl
+
+output "user_arns" {
+  value = [for user in aws_iam_user.users : user.arn]
+}
+
+output "group_arns" {
+  value = [for group in aws_iam_group.environment_groups : group.arn]
+}
+
+
+```
