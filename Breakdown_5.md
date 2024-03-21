@@ -224,21 +224,11 @@ resource "aws_iam_group_policy_attachment" "environment_policy_attachment" {
 }
 ```
 
-## Assign Users to Groups:
+## Are The Users Assigned Properly to the correct Groups?:
 
 **Task:** Manually ensure that each IAM user is a member of their respective group.
-**Question:** How are the custom policies linked to the IAM groups?
-**Answer:** The custom access policies are attached to the respective IAM groups to enforce the defined permissions for users in each environment.
-
-```hcl
-resource "aws_iam_group_membership" "development_membership" {
-  count = length(var.users)
-
-  name  = "${var.users[count.index]}-membership"
-  users = [aws_iam_user.users[count.index].name]
-  group = aws_iam_group.environment_groups["Development"].name
-}
-```
+**Question:** Are the custom policies linked to the IAM groups?
+**Answer:** By manually checking the console I can see that the custom access policies are attached to the respective IAM groups to enforce the defined permissions for users in each environment.
 
 ### Self Check Outputs:
 
@@ -256,5 +246,26 @@ output "group_arns" {
   value = [for group in aws_iam_group.environment_groups : group.arn]
 }
 
+```
+*Alternate Outputs with "names" instead of "arns"*
+
+```hcl
+output "user_names" {
+  value = [for user in aws_iam_user.users : user.name]
+}
+
+output "group_names" {
+  value = [for group in aws_iam_group.environment_groups : group.name]
+}
+
+output "groups_and_users" {
+  value = join("\n", [
+    "Development = ${join(", ", aws_iam_group_membership.environment_memberships[0].users)}",
+    "Staging = ${join(", ", aws_iam_group_membership.environment_memberships[1].users)}",
+    "Production = ${join(", ", aws_iam_group_membership.environment_memberships[2].users)}"
+  ])
+}
 
 ```
+
+
