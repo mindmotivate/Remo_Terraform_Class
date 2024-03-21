@@ -164,7 +164,7 @@ Look through the console and try to find the ones that best fit: (the following 
 
 
 ***Next, I simply took Remos' example from class and replaced the policy actions listed above:***
-***This will define the polic documents***
+***This will define the policy documents***
 
 ```hcl
 # Define custom policy documents for each environment
@@ -190,6 +190,17 @@ data "aws_iam_policy_document" "custom_policy_doc" {
   }
 }
 ```
+***The data resources behave simlar to maps***
+
+development = { actions = ["ec2:DescribeInstances", "s3:ListBucket", "s3:GetObject"] }
+
+staging     = { actions = ["s3:ListBucket", "s3:GetObject", "logs:DescribeLogGroups"] }
+
+production  = { actions = ["s3:GetObject"] }
+
+***The statement block is where the actual permissions are defined based on the relationships established in the data block.***
+
+
 ***No that we have created the policy documents, we can go ahead and create the policies (this was also taken directly from Remo's class example)***
 
 ```hcl
