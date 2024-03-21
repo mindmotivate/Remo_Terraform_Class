@@ -57,8 +57,8 @@ variable "users" {
 }
 ```
 
-***Again, there are alot of ways to accomplsh this, i like using the count length function becasue it is a bit more straighforward***
-***I simply wan tto manually iterate over each anme and attatch a group***
+***Again, there are alot of ways to accomplsh this, I like using the count length function becasue it is a bit more straighforward***
+***I simply want to manually iterate over each anme and attatch a group***
 
 ***The count parameter determines how many IAM users will be created. It's set to the length of the "users" list.***
 ***The name attribute of each IAM user is set to the corresponding user name from the "users" list.***
@@ -77,7 +77,7 @@ Now we have to manually assign each of the users we created to the correct group
 - User Assignment: Users are assigned to memberships, with each membership containing only one IAM user.
 - Group Assignment: IAM users are added to the IAM group associated with the proper environment.
 
-### This method is NOT DRY!! I will need to revisit this and try to make it simpler but ti gets the job done for now.
+### This method is NOT DRY!! I will need to revisit this and try to make it simpler but it gets the job done for now.
 
 ```hcl
 resource "aws_iam_group_membership" "development_membership" {
@@ -107,6 +107,26 @@ output "group_memberships" {
     "Staging"     = aws_iam_group_membership.staging_membership
     "Production"  = aws_iam_group_membership.production_membership
   }
+}
+```
+***If your output looks good, go ahead an proceed to custom access policies next...***
+
+
+## *Dry Approach
+If you want to try to create teh group membership resrouces dynamically using a DRY approach, you may want ot consider using the count = length argument.
+
+1. Count Users: Determine the number of users and create a membership for each.
+2. Membership Name: Generate a unique name for each membership.
+3. User Assignment: Assign each user to a membership.
+4. Group Assignment: Associate users with the correct IAM group based on their environment.
+
+```hcl
+resource "aws_iam_group_membership" "environment_memberships" {
+  count = length(var.users)  # Create memberships for each user
+  
+  name  = "${var.users[count.index]}-membership"  # Generate unique membership name
+  users = [aws_iam_user.users[count.index].name]  # Assign user to membership
+  group = aws_iam_group.environment_groups[var.environments[count.index]].name  # Associate user with correct IAM group
 }
 ```
 
