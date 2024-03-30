@@ -1,31 +1,37 @@
+
+/*
+# Define in a seperate terraform.tfvars module
+document_storage_bucket_name = "document-storage-bucket987"
+logs_bucket_name = "logs-bucket654"
+document_access_role_name = "document-access-role"
+logs_access_role_name = "logs-access-role"
+*/
+
 # Define Variables
-# Define the variable for the document storage bucket name
 variable "document_storage_bucket_name" {
   description = "Name of the S3 bucket used for storing documents."
   type        = string
-  default     = "document-storage-bucket987"
+  default     = ""
 }
 
-# Define the variable for the logs bucket name
 variable "logs_bucket_name" {
   description = "Name of the S3 bucket used for storing logs."
   type        = string
-  default     = "logs-bucket654"
+  default     = ""
 }
 
-# Define the variable for the IAM role name with read-write access to the document storage bucket
 variable "document_access_role_name" {
   description = "Name of the IAM role with read-write access to the document storage bucket."
   type        = string
-  default     = "document-access-role"
+  default     = ""
 }
 
-# Define the variable for the IAM role name with read-only access to the logs bucket
 variable "logs_access_role_name" {
   description = "Name of the IAM role with read-only access to the logs bucket."
   type        = string
-  default     = "logs-access-role"
+  default     = ""
 }
+
 
 # Create S3 Buckets
 # Create the S3 bucket for document storage
