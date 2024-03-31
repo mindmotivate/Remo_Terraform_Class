@@ -102,6 +102,79 @@ This item is still valid even though it lacks values for the "Model" and "Year" 
 In DynamoDB, each item must have a primary key attribute(s) which is mandatory. This primary key uniquely identifies each item in the table and is used to retrieve, update, or delete the item. Without a primary key, DynamoDB cannot store or manage the item effectively.
 
 
+### AWS Dynamo DB creation in console:
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/65cacd2a-0976-4e91-9b05-c91bb8cc9518)
+After creation:
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/95514a17-c8d9-4972-97c1-81cd0c731a85)
 
 
 
+
+## Dynamo DB with Terraform
+
+
+### Define a Terraform module for creating a DynamoDB table
+
+```hcl
+resource "aws_dynamodb_table" "cars" {
+  name           = "cars"  # Specify the name of the DynamoDB table
+  billing_mode   = "PAY_PER_REQUEST"  # Set the billing mode to "PAY_PER_REQUEST"
+  hash_key       = "VIN"  # Define the hash key for the table, which is the primary key
+
+  attribute {
+    name = "VIN"  # Specify the name of the attribute (column) as "VIN"
+    type = "S"    # Specify the data type of the attribute as "S" (String)
+  }
+}
+```
+
+- An attribute block begins with the keyword `attribute` followed by curly braces `{}`.
+- Inside the attribute block, you specify the properties of the attribute, such as its name and data type.
+- You can have multiple attribute blocks within a resource block, each defining a different attribute of the resource.
+- Attribute blocks can be expanded as needed to include additional attributes or properties of the resource.
+- In the case of the DynamoDB table example, attribute blocks are used to define the attributes (columns) of the table, allowing you to specify details about each attribute individually.
+
+- **Note: It's important to note that specifying the primary key attribute is mandatory when defining a DynamoDB table, as it uniquely identifies each item in the table.**
+
+### Resitry Reference: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table.html 
+Required arguments:
+
+- `attribute` - (Required) Set of nested attribute definitions. Only required for hash_key and range_key attributes. See below.
+- `hash_key` - (Required, Forces new resource) Attribute to use as the hash (partition) key. Must also be defined as an attribute. See below.
+- `name` - (Required) Unique within a region name of the table.
+
+Optional arguments:
+
+- `billing_mode` - (Optional) Controls how you are charged for read and write throughput and how you manage capacity. The valid values are PROVISIONED and PAY_PER_REQUEST. Defaults to PROVISIONED.
+- `deletion_protection_enabled` - (Optional) Enables deletion protection for table. Defaults to false.
+
+Attribute:
+
+- `name` - (Required) Name of the attribute
+- `type` - (Required) Attribute type. Valid values are S (string), N (number), B (binary).
+
+### Define a Terraform module for adding an item to a DynamoDB table
+
+resource "aws_dynamodb_table_item" "car_items" {
+  table_name = aws_dynamodb_table.cars.name  # Set the name of the table where the item will be stored
+  hash_key = aws_dynamodb_table.cars.hash_key  # Define the hash key to identify the item
+  item = <<EOF
+
+{
+  "VIN": {"S": "1HGBH41JXMN109186"},  # Define the VIN attribute with its value and data type
+  "Manufacturer": {"S": "Toyota"},  # Define the Manufacturer attribute with its value and data type
+  "Make": {"S": "Corolla"},  # Define the Make attribute with its value and data type
+  "Year": {"N": "2004"}  # Define the Year attribute with its value and data type
+}
+
+EOF
+}
+
+### https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table_item
+
+This argument supports the following arguments:
+
+- `hash_key` - (Required) Hash key to use for lookups and identification of the item
+- `item` - (Required) JSON representation of a map of attribute name/value pairs, one for each attribute. Only the primary key attributes are required; you can optionally provide other attribute name-value pairs for the item.
+- `range_key` - (Optional) Range key to use for lookups and identification of the item. Required if there is range key defined in the table.
+- `table_name` - (Required) Name of the table to contain the item.
