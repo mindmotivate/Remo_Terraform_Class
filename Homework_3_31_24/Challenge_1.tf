@@ -1,3 +1,16 @@
+# We will be using the following provide block for our configuration
+provider "aws" {
+  region = "us-east-1"
+}
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
 
 /*
 # Define in a seperate terraform.tfvars module
@@ -37,13 +50,11 @@ variable "logs_access_role_name" {
 # Create the S3 bucket for document storage
 resource "aws_s3_bucket" "document_storage" {
   bucket = var.document_storage_bucket_name
-  # region = "us-east-1"
 }
 
 # Create the S3 bucket for storing logs
 resource "aws_s3_bucket" "logs_bucket" {
   bucket = var.logs_bucket_name
-  # region = "us-east-1"
 }
 
 # Enable Versioning for Document Storage Bucket
@@ -117,7 +128,7 @@ resource "aws_iam_role" "document_access_role" {
     Statement = [{
       Effect    = "Allow",
       Principal = {
-        Service = "s3.amazonaws.com"
+        Service = "ec2.amazonaws.com"
       },
       Action    = "sts:AssumeRole"
     }]
@@ -132,7 +143,7 @@ resource "aws_iam_role" "logs_access_role" {
     Statement = [{
       Effect    = "Allow",
       Principal = {
-        Service = "s3.amazonaws.com"
+        Service = "ec2.amazonaws.com"
       },
       Action    = "sts:AssumeRole"
     }]
