@@ -86,5 +86,22 @@ We can represent this data in JSON format also:
 The primary key in a database is a unique identifier for each record or row in a table. It plays a crucial role in organizing and accessing data efficiently. Here's a brief explanation of its importance  
 **Note: The only unique identifier in this data is the "VIN" because any item can be uniquely identified with it**
 
+```json
+{
+  "Manufacturer": "Chevrolet",
+  "Model": "",
+  "Year": "",
+  "VIN": "2G1FK1EJ9B9241062"
+}
+```
+
+
+This item is still valid even though it lacks values for the "Model" and "Year" attributes because JSON allows for flexibility in data structure. Not all attributes need to be present in every item within a JSON array. In this case, the absence of "Model" and "Year" values simply means that these attributes are not applicable or not provided for this specific item. As long as the required attributes (in this case, "Manufacturer" and "VIN") are present and correctly formatted, the JSON item remains valid.
+
+
+In DynamoDB, each item must have a primary key attribute(s) which is mandatory. This primary key uniquely identifies each item in the table and is used to retrieve, update, or delete the item. Without a primary key, DynamoDB cannot store or manage the item effectively.
+
+
+
 
 
