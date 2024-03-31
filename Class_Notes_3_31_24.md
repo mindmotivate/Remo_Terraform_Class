@@ -107,6 +107,7 @@ In DynamoDB, each item must have a primary key attribute(s) which is mandatory. 
 After creation:
 ![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/95514a17-c8d9-4972-97c1-81cd0c731a85)
 
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/d7741760-46d9-4453-976f-9b6fb1ded58e)
 
 
 
