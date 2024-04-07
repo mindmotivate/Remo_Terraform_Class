@@ -17,7 +17,7 @@ provider "aws" {
 # Create an S3 bucket to store Terraform state
 resource "aws_s3_bucket" "terraform_state" {
   # Set the desired bucket name
-  bucket = "terraform-state-bucket301"
+  bucket = "terraform-state-bucket1336"
 
   # Allow Terraform to completely remove the bucket during destruction
   force_destroy = true
