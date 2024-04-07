@@ -1,5 +1,5 @@
 
-# Note: This code is run seperately from the inial remoe state configuration setup! It assumes tha the s3 bucket for the remote statefiel has been created
+# Note: This code is run seperately from the initial remote state configuration setup! It assumes that the s3 bucket for the remote state file has been created first
 # Configure Terraform to use the AWS provider
 terraform {
   required_providers {
@@ -16,16 +16,15 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Commented-out backend configuration (commented for clarity)
-/*
+# backend configuration
 backend "s3" {
-  bucket     = "terraform-state-bucket301"
+  bucket     = "terraform-state-bucket1336"
   key       = "backend/terraform.tfstate"
   dynamodb_table = "state-locking"
   encrypt    = true
   region     = "us-east-1"
 }
-*/
+
 
 # Create DynamoDB table for state locking
 resource "aws_dynamodb_table" "terraform_state_lock" {
