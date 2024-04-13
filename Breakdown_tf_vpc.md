@@ -174,5 +174,60 @@ resource "aws_security_group" "web_sg" {
 }
 ```
 
+### EC2 Instances and Scaling:
+
+Utilize a launch template for EC2 instances. Your template should specify instance types, the AMI ID, security groups, and any user data initialization scripts.
+Implement an Auto Scaling group that adjusts the number of instances based on demand, with specified minimum, maximum, and desired capacities.
+
+*Note: The aws_launch_template resource is used to define the specifications for EC2 instances, including instance type, 
+AMI ID, security groups, and user data initialization scripts.*
+
+
+```hcl
+resource "aws_launch_template" "my_launch_template" {
+  name          = "first-template"
+  image_id      = "ami-051f8a213df8bc089"
+  instance_type = "t2.micro"
+  key_name      = "secure"
+
+  # This code has been intentionally commented out
+  # This is denintely not required however I was curious to see how I could encorprate EBS should I ever need to
+/*
+  block_device_mappings {
+    device_name = "/dev/sda1"
+    
+    ebs {
+      volume_size = 20
+      volume_type = "gp2"
+    }
+  }
+  */
+
+  network_interfaces {
+    associate_public_ip_address = true
+    security_groups             = [aws_security_group.web_sg.id]
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "first template"
+    }
+  }
+
+  # User data script for initialization, this can obvioulsy be customized as needed
+  user_data = <<-EOF
+              #!/bin/bash
+              yum update -y
+              yum install -y httpd
+              systemctl start httpd
+              systemctl enable httpd
+              echo "<h1>Welcome to the Remo Terraform Web Server</h1>" > /var/www/html/index.html
+              EOF
+}
+
+```
+
+
 
 
