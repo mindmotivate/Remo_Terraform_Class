@@ -229,5 +229,59 @@ resource "aws_launch_template" "my_launch_template" {
 ```
 
 
+### Load Balancer: 
+Deploy an Application Load Balancer (ALB) to distribute incoming traffic among your instances. 
+
+Name: load-balancer
+Type: Application load balancer.
+Determines whether it's internal or external.
+Specifies the subnets for the load balancer.
+Target Group Configuration:
+
+### Target Group:
+Configure a target group for the ALB, specifying health check parameters to ensure traffic is only sent to healthy instances.
+
+Name: my-target-group
+Port: 80 (HTTP)
+Health check configuration, including path, protocol, interval, timeout, and thresholds.
+Scaling Policy Configuration:
+
+
+
+### Auto Scaling Group & Scaling Policies:
+Create a scaling policy based on CPU utilization, aiming for an average target value. This policy should automatically scale the number of instances in your Auto Scaling group.
+
+Name: autoscaling-group
+Utilizes a launch template for EC2 instance configuration.
+Defines minimum, maximum, and desired capacities.
+Specifies the VPC zone identifiers.
+Load Balancer Configuration:
+
+
+Name: my-scaling-policy
+Policy type: Target Tracking Scaling
+Utilizes predefined metric specification for average CPU utilization.
+Sets a target value of 50 for CPU utilization.
+Output Configuration:
+
+### Output:
+Your Terraform configuration should output the DNS name of the load balancer, allowing users to access your web application.
+
+Output name: load_balancer_dns
+Provides the DNS name of the load balancer.
+
+```hcl
+output "load_balancer_dns" {
+  value = aws_lb.my_load_balancer.dns_name
+}
+
+output "load_balancer_dns" {
+  value = "http://${aws_lb.my_load_balancer.dns_name}"
+}
+```
+
+
+
+
 
 
