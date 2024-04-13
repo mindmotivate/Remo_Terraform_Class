@@ -97,3 +97,82 @@ resource "aws_nat_gateway" "my_nat_gateway" {
   subnet_id      = aws_subnet.public_subnet[count.index].id
 }
 ```
+
+## Creating Routes:
+
+Configure appropriate route tables for public and private subnets. Ensure that instances in public subnets can directly access the internet, while instances in private subnets use the NAT Gateway.
+
+Route tables in cloud networking specify how traffic should be directed within a VPC. 
+
+```hcl
+resource "aws_route_table" "public_route_table" {
+  vpc_id = aws_vpc.my_vpc.id #It associates the route table with the vpc
+
+  route {
+    cidr_block = "0.0.0.0/0" #This is used for outbound traffic from the instances within the subnet to the IGW
+    gateway_id = aws_internet_gateway.my_ig.id # allows instances in public subnets to access the internet 
+  }
+}
+```
+
+*Note: For the private subnet: The traffic is directed to the NAT Gateway, which then facilitates outbound internet access for instances in the private subnet
+by translating their private IP addresses to the public IP address of the NAT Gateway*
+
+
+```hcl
+resource "aws_route_table" "private_route_table" {
+  count = 3
+  vpc_id = aws_vpc.my_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.my_nat_gateway[count.index].id
+  }
+}
+```
+
+## Security Groups:
+Define security groups for your application servers and load balancers. At a minimum, allow inbound HTTP and HTTPS traffic, alongside SSH and RDP for management.
+
+*Note: This aligns with RFC 1918, which recommends using private IP address ranges within a network and implementing measures to control traffic flow 
+between internal and external networks, ensuring network security and privacy.*
+
+
+```hcl
+resource "aws_security_group" "web_sg" {
+  name        = "web-sg"
+  description = "Security group for web servers"
+  vpc_id      = aws_vpc.my_vpc.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+```
+
+
+
