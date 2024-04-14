@@ -390,7 +390,6 @@ resource "aws_autoscaling_policy" "scaling_policy" {
   }
 }
 
-### Enabling instance scale-in protection:
 resource "aws_autoscaling_attachment" "autoscaling_group_attachment" {
   autoscaling_group_name = aws_autoscaling_group.autoscaling_group.name
   lb_target_group_arn   = aws_lb_target_group.target_group.arn
