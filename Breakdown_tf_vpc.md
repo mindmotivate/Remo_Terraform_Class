@@ -85,7 +85,8 @@ Set up a **NAT Gateway** to allow instances in the private subnets to access the
 
 ```hcl
 resource "aws_eip" "my_eip" {
-  count = 3 #ensures that three NAT Gateways and three corresponding EIPs are created, one for each Availability Zone.
+domain = "vpc"
+count = 3
 }
 ```
 *The EIP's created, will be assigned to the private subnets
@@ -95,6 +96,7 @@ resource "aws_nat_gateway" "my_nat_gateway" {
   count          = 3
   allocation_id  = aws_eip.my_eip[count.index].id
   subnet_id      = aws_subnet.public_subnet[count.index].id
+  depends_on = [aws_internet_gateway.my_ig]
 }
 ```
 
@@ -165,6 +167,13 @@ resource "aws_security_group" "web_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port   = 3389
+    to_port     = 3389
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -182,6 +191,7 @@ Implement an Auto Scaling group that adjusts the number of instances based on de
 *Note: The aws_launch_template resource is used to define the specifications for EC2 instances, including instance type, 
 AMI ID, security groups, and user data initialization scripts.*
 
+### Launch Template
 
 ```hcl
 resource "aws_launch_template" "my_launch_template" {
@@ -191,7 +201,7 @@ resource "aws_launch_template" "my_launch_template" {
   key_name      = "secure"
 
   # This code has been intentionally commented out
-  # This is denintely not required however I was curious to see how I could encorprate EBS should I ever need to
+  # This is definitely not required however I was curious to see how I could encorprate EBS should I ever need to
 /*
   block_device_mappings {
     device_name = "/dev/sda1"
@@ -203,10 +213,15 @@ resource "aws_launch_template" "my_launch_template" {
   }
   */
 
+
   network_interfaces {
     associate_public_ip_address = true
     security_groups             = [aws_security_group.web_sg.id]
   }
+
+
+    vpc_security_group_ids = [aws_security_group.web_sg.id]
+
 
   tag_specifications {
     resource_type = "instance"
@@ -215,89 +230,27 @@ resource "aws_launch_template" "my_launch_template" {
     }
   }
 
-  # User data script for initialization, this can obvioulsy be customized as needed
-  user_data = <<-EOF
+  # User data script for initialization, properly formatted and encoded in BASE64
+  user_data = base64encode(<<EOF
               #!/bin/bash
               yum update -y
               yum install -y httpd
               systemctl start httpd
               systemctl enable httpd
               echo "<h1>Welcome to the Remo Terraform Web Server</h1>" > /var/www/html/index.html
-              EOF
-}
+EOF
+  )
 
-```
-
-
-
-### Target Group:
-Configure a target group for the ALB, specifying health check parameters to ensure traffic is only sent to healthy instances.
-
-*Note: the direct association isn't present in the target group resource itself, it's established indirectly through the listener configuration on the ALB
-The target group works in conjunction with the ALB to distribute incoming traffic among the instances that are registered with it. 
-It continuously monitors the health of the instances using the defined health check parameters and routes traffic only to healthy instances, 
-ensuring high availability and reliability of the application.*
-
-```hcl
-resource "aws_lb_target_group" "my_target_group" {
-  name     = "my-target-group"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.my_vpc.id
-
-  health_check {
-    path                = "/"
-    protocol            = "HTTP"
-    port                = "traffic-port"
-    interval            = 30
-    timeout             = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
+  lifecycle {
+    create_before_destroy = true
   }
+
 }
+
 ```
 
-### Auto Scaling Group & Scaling Policies:
-Create a scaling policy based on CPU utilization, aiming for an average target value. This policy should automatically scale the number of instances in your Auto Scaling group.
+### Load Balancer:
 
-*Note: Public subnet instances are typically exposed to incoming internet traffic, which can vary and be unpredictable. 
-Therefore, it's essential to dynamically adjust the number of instances in response to fluctuations in demand to maintain performance and availability.*
-
-
-```hcl
-resource "aws_autoscaling_group" "autoscaling_group" {
-  name                    = "autoscaling-group"
-  launch_template {
-    id                    = aws_launch_template.my_launch_template.id
-    version               = "$Latest"
-  }
-  min_size                = 1
-  max_size                = 3
-  desired_capacity        = 1
-  vpc_zone_identifier     = aws_subnet.public_subnet[*].id
-}
-```
-Name: my-scaling-policy
-
-*Note: defines how an Auto Scaling Group (ASG) reacts to changes in demand or workload. In this context, 
-it refers to associating a scaling policy with an ASG, allowing it to automatically adjust the number of instances based on defined criteria.*
-
-```hcl
-resource "aws_autoscaling_policy" "my_scaling_policy" {
-  name                   = "my-scaling-policy"
-  policy_type            = "TargetTrackingScaling"
-  autoscaling_group_name = aws_autoscaling_group.my_autoscaling_group.name
-
-  target_tracking_configuration {
-    predefined_metric_specification {
-      predefined_metric_type = "ASGAverageCPUUtilization"
-    }
-    target_value = 50
-  }
-}
-```
-
-### Load Balancer: 
 Deploy an Application Load Balancer (ALB) to distribute incoming traffic among your instances. 
 
 *To be more precise, an Application Load Balancer intelligently distributes incoming application traffic across multiple targets, such as EC2 instances which are spread out amongst multiple Az's*
@@ -314,6 +267,136 @@ resource "aws_lb" "load_balancer" {
 }
 ```
 
+### Target Group:
+
+Configure a target group for the ALB, specifying health check parameters to ensure traffic is only sent to healthy instances.
+
+*Note: the direct association isn't present in the target group resource itself, it's established indirectly through the listener configuration on the ALB
+The target group works in conjunction with the ALB to distribute incoming traffic among the instances that are registered with it. 
+It continuously monitors the health of the instances using the defined health check parameters and routes traffic only to healthy instances, 
+ensuring high availability and reliability of the application.*
+
+```hcl
+resource "aws_lb_target_group" "target_group" {
+  name     = "target-group"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.my_vpc.id
+
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    port                = "traffic-port"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 5
+    matcher = "200"
+  }
+}
+```
+
+### Auto Scaling Group & Scaling Policies:
+Create a scaling policy based on CPU utilization, aiming for an average target value. This policy should automatically scale the number of instances in your Auto Scaling group.
+
+*Note: Public subnet instances are typically exposed to incoming internet traffic, which can vary and be unpredictable. 
+Therefore, it's essential to dynamically adjust the number of instances in response to fluctuations in demand to maintain performance and availability.*
+
+
+```hcl
+resource "aws_autoscaling_group" "autoscaling_group" {
+  name                      = "autoscaling-group"
+  launch_template {
+    id                      = aws_launch_template.my_launch_template.id
+    version                 = "$Latest"
+  }
+  min_size                  = 3
+  max_size                  = 8
+  desired_capacity          = 6
+  vpc_zone_identifier       = aws_subnet.public_subnet[*].id
+  health_check_type          = "EC2"
+  health_check_grace_period  = 300
+  force_delete               = true
+  target_group_arns          = [aws_lb_target_group.target_group.arn]
+
+  enabled_metrics = ["GroupMinSize", "GroupMaxSize", "GroupDesiredCapacity", "GroupInServiceInstances", "GroupTotalInstances"]
+
+  # Instance protection for launching
+  initial_lifecycle_hook {
+    name                  = "instance-protection-launch"
+    lifecycle_transition  = "autoscaling:EC2_INSTANCE_LAUNCHING"
+    default_result        = "CONTINUE"
+    heartbeat_timeout     = 60
+    notification_metadata = "{\"key\":\"value\"}"
+  }
+
+  # Instance protection for terminating
+  initial_lifecycle_hook {
+    name                  = "scale-in-protection"
+    lifecycle_transition  = "autoscaling:EC2_INSTANCE_TERMINATING"
+    default_result        = "CONTINUE"
+    heartbeat_timeout     = 300
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "app1-instance"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Environment"
+    value               = "Production"
+    propagate_at_launch = true
+  }
+
+}
+```
+
+### Target Group
+```hcl
+resource "aws_lb_target_group" "target_group" {
+  name     = "target-group"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.my_vpc.id
+
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    port                = "traffic-port"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 5
+    matcher = "200"
+  }
+}
+```
+
+### Scaling Policy
+```hcl
+resource "aws_autoscaling_policy" "scaling_policy" {
+  name                   = "scaling-policy"
+  policy_type            = "TargetTrackingScaling"
+  estimated_instance_warmup = 120
+  autoscaling_group_name = aws_autoscaling_group.autoscaling_group.name
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+    target_value = 75.0
+  }
+}
+
+### Enabling instance scale-in protection:
+resource "aws_autoscaling_attachment" "autoscaling_group_attachment" {
+  autoscaling_group_name = aws_autoscaling_group.autoscaling_group.name
+  lb_target_group_arn   = aws_lb_target_group.target_group.arn
+}
+```
+
 ### Listener
 
 *Note: By setting up the listener in this way, any incoming traffic to the ALB on port 80 (HTTP) will be forwarded to the target group 
@@ -327,7 +410,7 @@ resource "aws_lb_listener" "web_listener" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.my_target_group.arn
+    target_group_arn = aws_lb_target_group.target_group.arn
   }
 }
 ```
@@ -338,11 +421,11 @@ Output the DNS name of the load balancer, also allow users to access your web ap
 
 ```hcl
 output "load_balancer_dns" {
-  value = aws_lb.my_load_balancer.dns_name
+  value = aws_lb.load_balancer.dns_name
 }
 
-output "load_balancer_dns" {
-  value = "http://${aws_lb.my_load_balancer.dns_name}"
+output "load_balancer_dns_url_link" {
+  value = "http://${aws_lb.load_balancer.dns_name}"
 }
 ```
 
