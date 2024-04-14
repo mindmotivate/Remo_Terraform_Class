@@ -229,46 +229,112 @@ resource "aws_launch_template" "my_launch_template" {
 ```
 
 
-### Load Balancer: 
-Deploy an Application Load Balancer (ALB) to distribute incoming traffic among your instances. 
-
-Name: load-balancer
-Type: Application load balancer.
-Determines whether it's internal or external.
-Specifies the subnets for the load balancer.
-Target Group Configuration:
 
 ### Target Group:
 Configure a target group for the ALB, specifying health check parameters to ensure traffic is only sent to healthy instances.
 
-Name: my-target-group
-Port: 80 (HTTP)
-Health check configuration, including path, protocol, interval, timeout, and thresholds.
-Scaling Policy Configuration:
+*Note: the direct association isn't present in the target group resource itself, it's established indirectly through the listener configuration on the ALB
+The target group works in conjunction with the ALB to distribute incoming traffic among the instances that are registered with it. 
+It continuously monitors the health of the instances using the defined health check parameters and routes traffic only to healthy instances, 
+ensuring high availability and reliability of the application.*
 
+```hcl
+resource "aws_lb_target_group" "my_target_group" {
+  name     = "my-target-group"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.my_vpc.id
 
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    port                = "traffic-port"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+}
+```
 
 ### Auto Scaling Group & Scaling Policies:
 Create a scaling policy based on CPU utilization, aiming for an average target value. This policy should automatically scale the number of instances in your Auto Scaling group.
 
-Name: autoscaling-group
-Utilizes a launch template for EC2 instance configuration.
-Defines minimum, maximum, and desired capacities.
-Specifies the VPC zone identifiers.
-Load Balancer Configuration:
+*Note: Public subnet instances are typically exposed to incoming internet traffic, which can vary and be unpredictable. 
+Therefore, it's essential to dynamically adjust the number of instances in response to fluctuations in demand to maintain performance and availability.*
 
 
+```hcl
+resource "aws_autoscaling_group" "autoscaling_group" {
+  name                    = "autoscaling-group"
+  launch_template {
+    id                    = aws_launch_template.my_launch_template.id
+    version               = "$Latest"
+  }
+  min_size                = 1
+  max_size                = 3
+  desired_capacity        = 1
+  vpc_zone_identifier     = aws_subnet.public_subnet[*].id
+}
+```
 Name: my-scaling-policy
-Policy type: Target Tracking Scaling
-Utilizes predefined metric specification for average CPU utilization.
-Sets a target value of 50 for CPU utilization.
-Output Configuration:
+
+*Note: defines how an Auto Scaling Group (ASG) reacts to changes in demand or workload. In this context, 
+it refers to associating a scaling policy with an ASG, allowing it to automatically adjust the number of instances based on defined criteria.*
+
+```hcl
+resource "aws_autoscaling_policy" "my_scaling_policy" {
+  name                   = "my-scaling-policy"
+  policy_type            = "TargetTrackingScaling"
+  autoscaling_group_name = aws_autoscaling_group.my_autoscaling_group.name
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+    target_value = 50
+  }
+}
+```
+
+### Load Balancer: 
+Deploy an Application Load Balancer (ALB) to distribute incoming traffic among your instances. 
+
+*To be more precise, an Application Load Balancer intelligently distributes incoming application traffic across multiple targets, such as EC2 instances which are spread out amongst multiple Az's*
+
+*Note: Public internet traffic typically comes in via Layer 7 protocols such as HTTP and HTTPS. These protocols are commonly used for web-based applications and services, 
+allowing clients to communicate with servers over the internet using standardized request-response patterns*
+
+```hcl
+resource "aws_lb" "load_balancer" {
+  name               = "load-balancer"
+  internal           = false
+  load_balancer_type = "application"
+  subnets            = aws_subnet.public_subnet[*].id
+}
+```
+
+### Listener
+
+*Note: By setting up the listener in this way, any incoming traffic to the ALB on port 80 (HTTP) will be forwarded to the target group 
+target_group, allowing the ALB to communicate with the instances registered in that target group*
+
+```hcl
+resource "aws_lb_listener" "web_listener" {
+  load_balancer_arn = aws_lb.load_balancer.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.my_target_group.arn
+  }
+}
+```
+
 
 ### Output:
-Your Terraform configuration should output the DNS name of the load balancer, allowing users to access your web application.
-
-Output name: load_balancer_dns
-Provides the DNS name of the load balancer.
+Output the DNS name of the load balancer, also allow users to access your web application via a clickable link.
 
 ```hcl
 output "load_balancer_dns" {
