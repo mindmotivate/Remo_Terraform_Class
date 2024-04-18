@@ -20,7 +20,6 @@ Resources:
           Value: 'Chewbacca'
         - Key: 'Planet'
           Value: 'Mustafar'
-```
 
   PublicSubnetOne:
     Type: 'AWS::EC2::Subnet'
