@@ -441,3 +441,11 @@ aws cloudformation delete-stack --stack-name my-dynamodb-stack
 
 ![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/59737c3f-dfd4-4986-a705-6b64b065b7f0)
 
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/15579fe4-386d-43c1-8df0-c0766b26d990)
+
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/7d39e349-fe69-496c-9062-ae27028f22e1)
+
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/98f910b4-b453-4cc3-a85f-9611732ce6af)
+
+
+
