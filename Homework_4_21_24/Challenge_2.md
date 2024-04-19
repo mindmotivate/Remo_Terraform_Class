@@ -358,3 +358,86 @@ Outputs:
     Description: ARN of the CloudWatch alarm for high CPU utilization
     Value: !Ref HighCPUUtilizationAlarm
 ```
+
+### AWS CLI Commands:
+
+```bash
+aws cloudformation validate-template --template-body file://dynamo_db.yaml
+ 
+aws cloudformation create-stack --stack-name my-dynamodb-stack --template-body file://dynamo_db.yaml --capabilities CAPABILITY_IAM
+
+aws cloudformation describe-stacks --stack-name my-dynamodb-stack
+
+aws cloudformation delete-stack --stack-name my-dynamodb-stack
+```
+
+### Terminal Results:
+
+```bash
+{
+    "Parameters": [],
+    "Description": "AWS infrastructure deployment with VPC, subnets, NAT gateway, load balancer, and autoscaling group."
+}
+
+{
+    "StackId": "arn:aws:cloudformation:us-east-1:732504928444:stack/my-dynamodb-stack/205dcfc0-fe03-11ee-a0c2-0eab19c9c72b"
+}
+
+
+{
+    "Stacks": [
+        {
+            "StackId": "arn:aws:cloudformation:us-east-1:732504928444:stack/my-dynamodb-stack/205dcfc0-fe03-11ee-a0c2-0eab19c9c72b",
+            "StackName": "my-dynamodb-stack",
+            "Description": "AWS infrastructure deployment with VPC, subnets, NAT gateway, load balancer, and autoscaling group.",
+            "CreationTime": "2024-04-19T04:13:07.718000+00:00",
+            "RollbackConfiguration": {},
+            "StackStatus": "CREATE_IN_PROGRESS",
+            "DisableRollback": false,
+            "NotificationARNs": [],
+            "Capabilities": [
+                "CAPABILITY_IAM"
+            ],
+            "Tags": [],
+            "EnableTerminationProtection": false,
+            "DriftInformation": {
+                "StackDriftStatus": "NOT_CHECKED"
+            }
+        }
+    ]
+}
+
+```
+
+```bash
+            "Outputs": [
+                {
+                    "OutputKey": "LoadBalancerDNSName",
+                    "OutputValue": "my-dyn-LoadB-VWj4BzlD4siO-1628621587.us-east-1.elb.amazonaws.com",
+                    "Description": "DNS Name of the Load Balancer"
+                },
+                {
+                    "OutputKey": "DynamoDBTableName",
+                    "OutputValue": "MyDynamoDBTable",
+                    "Description": "Name of the DynamoDB table"
+                },
+                {
+                    "OutputKey": "CloudWatchAlarmARN",
+                    "OutputValue": "HighCPUUtilization",
+                    "Description": "ARN of the CloudWatch alarm for high CPU utilization"
+```
+
+### Console Results:
+
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/f78bc0c0-6b96-43d3-b7c4-6a9d451a52b4)
+
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/cbef8900-b4d3-4ffe-9deb-886d1f3e3ffe)
+
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/6c9b079a-11b5-46f5-a20c-0cd3c20dc4b8)
+
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/8334fa45-de74-457d-a8c1-342744ed4a08)
+
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/942fb9be-1eac-4f12-984e-cab8aaee6f75)
+
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/59737c3f-dfd4-4986-a705-6b64b065b7f0)
+
