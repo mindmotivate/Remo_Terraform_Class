@@ -448,4 +448,9 @@ aws cloudformation delete-stack --stack-name my-dynamodb-stack
 ![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/98f910b4-b453-4cc3-a85f-9611732ce6af)
 
 
+### Delete Stack
+
+```bash
+aws cloudformation delete-stack --stack-name my-dynamodb-stack
+```
 
