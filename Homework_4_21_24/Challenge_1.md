@@ -297,6 +297,7 @@ Specifies desired capacity, minimum and maximum size, health check type, and ass
 Configures a launch template with user data to bootstrap instances.
 Installs Apache HTTP server and generates HTML content displaying EC2 instance details.
 Includes metadata retrieval using the EC2 instance metadata service.
+
 ```yaml  
   LaunchTemplate:
     Type: 'AWS::EC2::LaunchTemplate'
@@ -342,8 +343,56 @@ Includes metadata retrieval using the EC2 instance metadata service.
             </html>
             EOF
 ```
+
+
+### Dynamo DB:
+
+```yaml
+ DynamoDBTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: 'MyDynamoDBTable'
+      AttributeDefinitions:
+        - AttributeName: 'id'
+          AttributeType: 'S'
+      KeySchema:
+        - AttributeName: 'id'
+          KeyType: 'HASH'
+      BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: 'Name'
+          Value: 'MyDynamoDBTable'
+```
+
+### SNS Topic:
+```yaml
+  MySNSTopic:
+    Type: 'AWS::SNS::Topic'
+    Properties:
+      DisplayName: 'MySNSTopic'
+      TopicName: 'MySNSTopic'
+
+  HighCPUUtilizationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: HighCPUUtilization
+      ComparisonOperator: GreaterThanThreshold
+      EvaluationPeriods: 5
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Period: 300
+      Statistic: Average
+      Threshold: 75
+      AlarmActions:
+        - !Ref MySNSTopic
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref AutoScalingGroup # Replace with your AutoScaling group name or ARN
+```
+
 ### Outputs Section:
 Provides outputs for the Load Balancer DNS name, DynamoDB table name, and CloudWatch alarm ARN for reference or usage outside the template.
+
 ```yaml
 Outputs:
   LoadBalancerDNSName:
