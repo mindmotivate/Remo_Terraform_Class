@@ -417,6 +417,8 @@ aws cloudformation create-stack --stack-name my-dynamodb-stack --template-body f
 
 aws cloudformation describe-stacks --stack-name my-dynamodb-stack
 
+aws cloudformation describe-stacks --stack-name MyWebAppStack --query "Stacks[0].Outputs" --output json
+
 aws cloudformation delete-stack --stack-name my-dynamodb-stack
 ```
 
