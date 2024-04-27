@@ -132,7 +132,10 @@ output "ec2_instance_id" {
 
 
 ### Console Results
+
 ![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/966de9d9-6c6b-430f-a84e-369c088d2ad2)
+
 ![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/4ec4b919-502c-48c7-a35b-b98efef10b28)
+
 ![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/b625630c-db63-46a3-9144-902e2bc5da2e)
 
