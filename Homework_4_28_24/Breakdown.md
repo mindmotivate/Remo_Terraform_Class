@@ -75,9 +75,31 @@ module "project-app" {
   }
 ```
 
+## eu-west-1 sub-directory:
 
+### providers.tf
+```hcl
+# Defines the provider for eu-west-1 region
+provider "aws" {
+  region = "eu-west-1"
+}
 
-
-
-
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+```
+### main.tf
+```hcl
+# References the EC2 instance module for eu-west-1 region
+module "ec2_instance_eu_west_1" {
+  source       = "../modules/ec2_instance"
+  app_region   = "eu-west-1"
+  ami          = "ami-0d421d8481" # Replace this with the appropriate AMI ID for eu-west-1 as needed
+}
+```
 
