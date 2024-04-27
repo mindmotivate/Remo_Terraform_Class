@@ -21,6 +21,8 @@
 ## Modular Setup
 The "modules" parent directory contains a child directory called "project-app" which houses the resources for the project
 
+[Project Hierarchy](https://github.com/mindmotivate/Remo_Terraform_Class/tree/main/Homework_4_28_24)
+
 ### project-app resources:
 ```hcl
 resource "aws_instance" "app_server" {
