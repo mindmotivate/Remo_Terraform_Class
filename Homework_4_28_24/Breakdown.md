@@ -103,3 +103,36 @@ module "ec2_instance_eu_west_1" {
 }
 ```
 
+### Terminal Outputs:
+The terminal will display the following outputs upon resource creation:
+```bash
+module.project-app.aws_s3_bucket.project_data: [id=us-east-1-project-data]
+module.project-app.aws_dynamodb_table.project_db: [id=us-east-1-table]
+module.project-app.aws_instance.app_server: [id=i-0ce955d84cb81b7a8]
+```
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/3d816e8a-c4e0-4b49-8946-e3398f687699)
+
+Optionally, another set of output resources can be used:
+### outputs.tf
+```hcl
+output "dynamodb_table_name" {
+  value = module.project-app.dynamodb_table_name
+}
+
+output "s3_bucket_name" {
+  value = module.project-app.s3_bucket_name
+}
+
+output "ec2_instance_id" {
+  value = module.project-app.ec2_instance_id
+}
+```
+
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/d8c9d826-0cf1-4c82-996f-fcb9da3bbc05)
+
+
+### Console Results
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/966de9d9-6c6b-430f-a84e-369c088d2ad2)
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/4ec4b919-502c-48c7-a35b-b98efef10b28)
+![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/b625630c-db63-46a3-9144-902e2bc5da2e)
+
