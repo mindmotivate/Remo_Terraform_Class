@@ -131,11 +131,14 @@ output "ec2_instance_id" {
 ![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/d8c9d826-0cf1-4c82-996f-fcb9da3bbc05)
 
 
-### Console Results
+### Console Results:
 
+s3 creation:
 ![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/966de9d9-6c6b-430f-a84e-369c088d2ad2)
 
+dynamo_db creation: 
 ![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/4ec4b919-502c-48c7-a35b-b98efef10b28)
 
+ec2 creation:
 ![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/b625630c-db63-46a3-9144-902e2bc5da2e)
 
