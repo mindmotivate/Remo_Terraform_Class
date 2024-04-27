@@ -1,3 +1,23 @@
+## Requirements:
+
+**Homework Objective:** Develop a Terraform setup for deploying identical resources across two AWS regions using modular design principles.
+- **Modular Structure**
+  - **modules/ Directory:** Contains reusable Terraform code for EC2 instances and DynamoDB tables.
+    - **ec2_instance/:** Module for creating EC2 instances.
+    - **dynamodb_table/:** Module for creating DynamoDB tables.
+  - **Regional Directories (us-east-1/ and eu-west-1/):** Contains configuration files for each region.
+- **Modules**
+  - **EC2 Instance Module:** Defines creation of EC2 instances with parameters like AMI ID and instance type.
+  - **DynamoDB Table Module:** Outlines creation of DynamoDB tables with configurable parameters like table name.
+  - **s3_bucket/:** Module for creating S3 buckets.
+  - **Variables:** Modules include variable definitions for inputs like AMI IDs and table names.
+- **Regional Configuration**
+  - Each regional directory has its own main.tf calling modules with region-specific parameters.
+  -  - Each regional directory has its own region specific providers.tf file
+- **Output Values**
+  - **Outputs:** Configured to return essential information like EC2 instance IDs and DynamoDB table names after deployment.
+
+
 ## Modular Setup
 The "modules" parent directory contains a child directory called "project-app" which houses the resources for the project
 
@@ -103,6 +123,9 @@ module "ec2_instance_eu_west_1" {
 }
 ```
 
+
+## ***Example Execution Results for US East Region:***
+
 ### Terminal Outputs:
 The terminal will display the following outputs upon resource creation:
 ```bash
@@ -129,7 +152,6 @@ output "ec2_instance_id" {
 ```
 
 ![image](https://github.com/mindmotivate/Remo_Terraform_Class/assets/130941970/d8c9d826-0cf1-4c82-996f-fcb9da3bbc05)
-
 
 ### Console Results:
 
